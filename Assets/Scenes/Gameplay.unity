@@ -15046,7 +15046,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterController: {fileID: 1820288755}
-  forwardMoveSpeed: 12
+  forwardMoveSpeed: 6
   backwardMoveSpeed: 3.5
   gravity: -19.62
   groundCheck: {fileID: 2063687103}
@@ -15054,6 +15054,10 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 8
+  totalStamina: 100
+  currentStamina: 100
+  isRunning: 0
+  canRun: 1
 --- !u!114 &1820288758
 MonoBehaviour:
   m_ObjectHideFlags: 0
