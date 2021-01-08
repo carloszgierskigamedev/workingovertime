@@ -107,4 +107,12 @@ public class PlayerMovement : MonoBehaviour
         _canRun = true;
     }
 
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (hit.transform.gameObject.CompareTag("Door"))
+        {
+            hit.rigidbody.AddForceAtPosition(-hit.normal * 10f, hit.point);
+        }
+    }
+
 }
