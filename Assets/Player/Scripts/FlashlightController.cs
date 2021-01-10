@@ -4,14 +4,16 @@ using UnityEngine;
 
 public class FlashlightController : MonoBehaviour
 {
-    [SerializeField] private bool flashlightEnabled = false;
-    [SerializeField] private GameObject lightSource; 
-    private bool flashlightCooldown = false;
-    //[SerializeField] private AudioSource audioSource;
+    [SerializeField] private bool _flashlightEnabled = false;
+    [SerializeField] private GameObject _lightSource; 
+    private bool _flashlightCooldown = false;
+    private AudioSource _audioSource = null;
+
     // Start is called before the first frame update
     void Start()
     {
-        lightSource.SetActive(false);
+        _lightSource.SetActive(false);
+        _audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -19,17 +21,19 @@ public class FlashlightController : MonoBehaviour
     {
         if (Input.GetButtonDown("FlashlightInput"))
         {
-            if(!flashlightCooldown)
+            if(!_flashlightCooldown)
             {
-                if (!flashlightEnabled)
+                if (!_flashlightEnabled)
                 {
-                    lightSource.SetActive(true);
-                    flashlightEnabled = true;
+                    _audioSource.Play();
+                    _lightSource.SetActive(true);
+                    _flashlightEnabled = true;
                 }
                 else
                 {
-                    lightSource.SetActive(false);
-                    flashlightEnabled = false;
+                    _audioSource.Play();
+                    _lightSource.SetActive(false);
+                    _flashlightEnabled = false;
                 }
 
                 StartCoroutine(FlashlightCooldown());
@@ -40,6 +44,6 @@ public class FlashlightController : MonoBehaviour
     IEnumerator FlashlightCooldown()
     {
         yield return new WaitForSeconds(0.5f);
-        flashlightCooldown = false;
+        _flashlightCooldown = false;
     }
 }

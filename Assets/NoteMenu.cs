@@ -6,7 +6,13 @@ public class NoteMenu : MonoBehaviour
 {
     public static bool NoteIsActive = false;
 
-    [SerializeField] private GameObject noteMenuUI = default;
+    [SerializeField] private GameObject _noteMenuUI = default;
+    private AudioSource _audioSource = default;
+
+    void Start() 
+    {
+        _audioSource = GetComponent<AudioSource>();
+    }
 
     // Update is called once per frame
     void Update()
@@ -26,13 +32,15 @@ public class NoteMenu : MonoBehaviour
 
     void ShowNoteMenu()
     {
-        noteMenuUI.SetActive(true);
+        _audioSource.Play();
+        _noteMenuUI.SetActive(true);
         NoteIsActive = true;
     }
 
     void CloseNoteMenu()
     {
-        noteMenuUI.SetActive(false);
+        _audioSource.Play();
+        _noteMenuUI.SetActive(false);
         NoteIsActive = false;
     }
 }
