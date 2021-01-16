@@ -15,7 +15,7 @@ public class TaskController : MonoBehaviour
     private bool _monitorsTaskCompleted = false;
     private int _monitorVisited = 0;
     private bool _printerTaskCompleted = false;
-    private bool _allTasksCompleted = true;
+    private bool _allTasksCompleted = false;
     private float _hidingTime = 3f;
     private bool _hasInteracted = false;
 
