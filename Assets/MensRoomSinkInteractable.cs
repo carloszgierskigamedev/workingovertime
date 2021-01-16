@@ -16,6 +16,7 @@ public class MensRoomSinkInteractable : BaseInteractable
         {
             _alreadyInteracted = true;
             GameObject.FindObjectOfType<TaskController>().MensRoomTaskCompleted();
+            GameObject.FindObjectOfType<TaskController>().BathroomTaskText();
         }
     }
 }

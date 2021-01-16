@@ -16,6 +16,7 @@ public class LadiesRoomInteractable : BaseInteractable
         {
             _alreadyInteracted = true;
             GameObject.FindObjectOfType<TaskController>().LadiesRoomTaskCompleted();
+            GameObject.FindObjectOfType<TaskController>().BathroomTaskText();
         }
     }
 }

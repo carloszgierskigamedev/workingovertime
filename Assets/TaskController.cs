@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class TaskController : MonoBehaviour
 {
@@ -14,8 +15,9 @@ public class TaskController : MonoBehaviour
     private bool _monitorsTaskCompleted = false;
     private int _monitorVisited = 0;
     private bool _printerTaskCompleted = false;
-    private bool _allTasksCompleted = false;
+    private bool _allTasksCompleted = true;
     private float _hidingTime = 3f;
+    private bool _hasInteracted = false;
 
     void Start()
     {
@@ -72,11 +74,35 @@ public class TaskController : MonoBehaviour
         if (_bathroomTaskCompleted && _monitorsTaskCompleted && _ovenTaskCompleted && _printerTaskCompleted)
         { 
             _allTasksCompleted = true;
-            presidentDoorText = UpdatePresidentDoorSaidLinesText();
         }
 
         presidentDoorText = UpdatePresidentDoorSaidLinesText();
         StartCoroutine(TextPopUp(saidLinesText.gameObject, saidLinesText, presidentDoorText, _hidingTime));
+        if (_allTasksCompleted)
+        {
+            StartCoroutine(ChangeSceneToEndGame());
+        }
+    }
+
+    public void IntentionalLockedDoorReaction()
+    {
+        string intentionalLockedDoorTextReaction = "Puta que pariu?! Que merda foi essa????";
+        StartCoroutine(TextPopUp(saidLinesText.gameObject, saidLinesText, intentionalLockedDoorTextReaction, _hidingTime));
+    }
+
+    public void IntentionalLockedDoorInteraction()
+    {
+        
+        string intentionalLockedDoorTextInteract;
+        intentionalLockedDoorTextInteract = _hasInteracted ? "Ok, não posso me desesperar..." : "A porta está trancada? O que caralhos está acontecendo aqui?"; 
+
+        StartCoroutine(TextPopUp(saidLinesText.gameObject, saidLinesText, intentionalLockedDoorTextInteract, _hidingTime));
+
+        if (!_hasInteracted)
+        {
+            _hasInteracted = true;
+        }
+        
     }
 
     private void FirstSaidLineAndTimer()
@@ -88,7 +114,7 @@ public class TaskController : MonoBehaviour
 
     private void TutorialTextShowUp()
     {
-        string tutorialText = "Aperte 'F' para lanterna.\nAperte 'Tab' para ver suas tarefas.";
+        string tutorialText = "Aperte 'F' para lanterna.\nAperta 'E' para interagir.\nAperte 'Tab' para ver suas tarefas.";
         StartCoroutine(TextPopUp(saidLinesText.gameObject, saidLinesText, tutorialText, _hidingTime));
     }
 
@@ -98,9 +124,8 @@ public class TaskController : MonoBehaviour
         taskText.text += _monitorsTaskCompleted ? "<s>1. Apagar os monitores;</s>\n" : "1. Apagar os monitores;\n";
         taskText.text += _bathroomTaskCompleted ? "<s>2. Conferir as pias dos banheiros e cozinha;</s>\n" : "2. Conferir as pias dos banheiros e cozinha;\n";
         taskText.text += _ovenTaskCompleted ? "<s>3. Conferir o fogão;</s>\n" : "3.  Conferir o fogão;\n";
-        taskText.text += "4.  Fechar as janelas;\n"; //Criar as janelas
-        taskText.text += _printerTaskCompleted ? "<s>5. Desligar a impressora;</s>\n" : "5. Desligar a impressora;\n";
-        taskText.text += "6. Pegue a chave na sala do presidente e abra a porta, mas não se esqueça de trancar ao sair.\n";
+        taskText.text += _printerTaskCompleted ? "<s>4. Desligar a impressora;</s>\n" : "4. Desligar a impressora;\n";
+        taskText.text += "5. Pegue a chave na sala do presidente e abra a porta, mas não se esqueça de trancar ao sair.\n";
         taskText.text += "A sala do presidente vai estar aberta, a chave está na gaveta da mesa dele!\n";
         taskText.text += "\nAbraços, \n";
         taskText.text += "Robson";
@@ -111,6 +136,17 @@ public class TaskController : MonoBehaviour
         return _allTasksCompleted ? "A porta está trancada??? Como diabos eu vou pegar a chave?!" : "Preciso terminar as tarefas antes de sair, não posso ser tão irresponsável sendo o vice presidente.";
     }
 
+    public void BathroomTaskText()
+    {
+        if (!_bathroomTaskCompleted)
+        {
+            StartCoroutine(TextPopUp(saidLinesText.gameObject, saidLinesText, "Ok, um banheiro foi, falta o outro.", 2f));
+        }
+        else
+        {
+            StartCoroutine(TextPopUp(saidLinesText.gameObject, saidLinesText, "Ambos banheiros checados.", 2f));
+        }
+    }
     IEnumerator TextPopUp(GameObject textToHide, TextMeshProUGUI textToChange, string changedText, float hidingTime, bool isFirstLine = false)
     {
         if (isFirstLine)
@@ -128,5 +164,12 @@ public class TaskController : MonoBehaviour
         {
             TutorialTextShowUp();
         }
+    }
+
+    public IEnumerator ChangeSceneToEndGame()
+    {
+        GameObject.FindObjectOfType<FadeController>().FadeOut();
+        yield return new WaitForSeconds(4.5f);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 }

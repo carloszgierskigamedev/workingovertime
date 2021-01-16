@@ -10,7 +10,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _forwardRunSpeed = 10f;
     [SerializeField] private float _backwardMoveSpeed = 3.5f;
     [SerializeField] private float _gravity = -9.81f;
-    private Vector3 _velocity;
+    private Vector3 _velocity = default;
     [Header("Ground Check")]
     [SerializeField] private Transform _groundCheck = default;
     [SerializeField] private float _groundDistance = 0.4f;
@@ -20,8 +20,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _staminaRunCost = 30;
     [SerializeField] private float _staminaRecoverAmount = 15;
     [SerializeField] private float _currentStamina = default;
-    private bool _isGrounded;
+    private bool _isGrounded = default;
     private bool _isRunning = false;
+    public bool IsRunning => _isRunning;
     private bool _canRun = true;
 
     void Start()
@@ -43,10 +44,11 @@ public class PlayerMovement : MonoBehaviour
         float verticalMovement = Input.GetAxisRaw("Vertical");
 
         Vector3 movement = transform.right * horizontalMovement + transform.forward * verticalMovement;
+        Vector3 movementNormalized = Vector3.Normalize(movement);
 
         float forwardSpeed = _isRunning ? _forwardRunSpeed : _forwardWalkSpeed;
         float moveSpeedToUse = (verticalMovement >= 0) ? forwardSpeed : _backwardMoveSpeed;
-        _characterController.Move(movement * moveSpeedToUse * Time.deltaTime);
+        _characterController.Move(movementNormalized * moveSpeedToUse * Time.deltaTime);
 
         _velocity.y += _gravity * Time.deltaTime;
 
@@ -111,7 +113,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (hit.transform.gameObject.CompareTag("Door"))
         {
-            hit.rigidbody.AddForceAtPosition(-hit.normal * 10f, hit.point);
+            hit.rigidbody.AddForceAtPosition(-hit.normal * 5f, hit.point);
         }
     }
 

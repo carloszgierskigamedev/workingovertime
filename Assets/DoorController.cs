@@ -4,52 +4,73 @@ using UnityEngine;
 
 public class DoorController : MonoBehaviour
 {
-    HingeJoint doorHingeJoint;
-    Rigidbody rigidBody;
-    [SerializeField] private bool closedDoor = false;
-    // Start is called before the first frame update
+    
+    [SerializeField] private bool _closedDoor = false;
+    [SerializeField] private AudioClip[] _doorSfx = default;
+    HingeJoint _doorHingeJoint = default;
+    Rigidbody _rigidBody = default;
+    private AudioSource _audioSource = default;
+    private bool _alreadyPlayedDoorHingeSFX = false;
+    private float _yRotation = default;
+    private float _velocityBeforeClosing = default;
+    public bool IsDoorLocked => _rigidBody.isKinematic;
+    public bool ClosedDoor => _closedDoor;
+
     void Start()
     {
-        closedDoor = true;
-        doorHingeJoint = GetComponent<HingeJoint>();
-        rigidBody = GetComponent<Rigidbody>();
+        _closedDoor = true;
+        _doorHingeJoint = GetComponent<HingeJoint>();
+        _rigidBody = GetComponent<Rigidbody>();
+        _audioSource = GetComponent<AudioSource>();
     }
 
-    // Update is called once per frame
     void Update()
     {  
-        JointLimits hingeJointLimits = doorHingeJoint.limits;
-        float yRotation = transform.rotation.eulerAngles.y;
-        
-        OpenAndCloseCycle(yRotation, doorHingeJoint, hingeJointLimits);
-        LockDoorOnPositionZero(yRotation, doorHingeJoint, hingeJointLimits);
+        JointLimits hingeJointLimits = _doorHingeJoint.limits;
+        _yRotation = transform.rotation.eulerAngles.y;
+
+        if (Mathf.Abs(_doorHingeJoint.velocity) > 1)
+        {
+            _velocityBeforeClosing = Mathf.Abs(_doorHingeJoint.velocity);
+        }
+
+        OpenAndCloseCycle(_yRotation, _doorHingeJoint, hingeJointLimits);
+        LockDoorOnPositionZero(_yRotation, _doorHingeJoint, hingeJointLimits);
     }
 
     void OpenAndCloseCycle(float yRotation, HingeJoint hingeJoint, JointLimits hingeJointLimits)
     {
-        if (closedDoor && (yRotation > 5f && yRotation <= 90f))
+        if (Mathf.Abs(_doorHingeJoint.velocity) > 10f && !_alreadyPlayedDoorHingeSFX)
         {
-            Debug.Log(closedDoor);
-            Debug.Log(yRotation);
+            if (Mathf.Abs(_doorHingeJoint.velocity) < 45f) 
+            {
+                _audioSource.PlayOneShot(_doorSfx[1], 0.5f);
+            }
+
+            _alreadyPlayedDoorHingeSFX = true;
+            StartCoroutine(doorHingeSfxCooldown());
+        }
+
+        if (_closedDoor && (yRotation > 5f && yRotation <= 90f))
+        {
             hingeJointLimits.min = 0f;
             hingeJointLimits.max = 90f;
             hingeJoint.limits = hingeJointLimits;
-            closedDoor = false;
+            _closedDoor = false;
         }
-        else if (closedDoor && (yRotation >= 270f && yRotation < 355))
+        else if (_closedDoor && (yRotation >= 270f && yRotation < 355))
         {
             hingeJointLimits.min = -90f;
             hingeJointLimits.max = 0f;
             hingeJoint.limits = hingeJointLimits;
-            closedDoor = false;
+            _closedDoor = false;
         } 
     }
 
     void LockDoorOnPositionZero(float yRotation, HingeJoint hingeJoint, JointLimits hingeJointLimits)
     {
-        if (!closedDoor && (yRotation <= 4f || yRotation >= 356f))
+        if (!_closedDoor && (yRotation <= 4f || yRotation >= 356f))
         {
-            Debug.Log(yRotation);
             hingeJointLimits.max = 0f;
             hingeJointLimits.min = 0f;
             hingeJoint.limits = hingeJointLimits;            
@@ -58,11 +79,53 @@ public class DoorController : MonoBehaviour
 
             if (yRotation == 0f || yRotation == 360f)
             {
+                if (_velocityBeforeClosing < 80f)
+                {
+                    _audioSource.PlayOneShot(_doorSfx[0], 0.3f);
+                }
+                else 
+                {
+                    _audioSource.PlayOneShot(_doorSfx[2]);
+                }
+
                 hingeJointLimits.max = 90f;
                 hingeJointLimits.min = -90f;
                 hingeJoint.limits = hingeJointLimits;
-                closedDoor = true;
+                _closedDoor = true;
             }
         }
+    }
+
+    IEnumerator doorHingeSfxCooldown()
+    {
+        yield return new WaitUntil(() => Mathf.Abs(_doorHingeJoint.velocity) < 10f);
+        _alreadyPlayedDoorHingeSFX = false;
+    }
+
+    public void LockDoor()
+    {
+        StartCoroutine(LockDoorCoroutine());
+    }
+
+    public void UnlockDoor(float waitTime = 0f)
+    {
+        StartCoroutine(UnlockDoorCoroutine(waitTime));
+    }
+
+    private IEnumerator LockDoorCoroutine()
+    {
+        if (_closedDoor && !IsDoorLocked)
+        {
+            _rigidBody.isKinematic = true;
+            yield return new WaitForSeconds(1.5f);
+            _audioSource.PlayOneShot(_doorSfx[3]);
+        }
+    }
+
+    private IEnumerator UnlockDoorCoroutine(float waitTime = 0f)
+    {
+        yield return new WaitForSeconds(waitTime);
+        _rigidBody.isKinematic = false;
+        _audioSource.PlayOneShot(_doorSfx[3]);
     }
 }
